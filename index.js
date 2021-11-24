@@ -1,3 +1,5 @@
+"use strict";
+
 const express = require('express');
 
 const app = express();  
@@ -59,7 +61,7 @@ class Class{
         else return false;
 
         if( (this.users.size < this.capacity) && (this.waitingList.size > 0) ){
-            let waitingUser = [...this.waitingList][0];
+            let [ waitingUser ] = this.waitingList; //getting the first element
             this.waitingList.delete(waitingUser);
             this.users.add(waitingUser);
         }
@@ -69,9 +71,13 @@ class Class{
 }
 
 var classMap = new Map();
-classMap.set("yoga", new Class("yoga", Date.now() + 1200000, 100));
-classMap.set("gym", new Class("gym", Date.now() + 300000, 200));
-classMap.set("dance", new Class("dance", Date.now(), 300));
+
+let timeAfter30 = new Date();
+timeAfter30.setMinutes(timeAfter30.getMinutes() + 30);
+
+classMap.set("yoga", new Class("yoga", new Date('2022-02-17'), 100)); // a random future date
+classMap.set("gym", new Class("gym", timeAfter30, 200)); //just 30 mins from now 
+classMap.set("dance", new Class("dance", new Date('1999-09-10'), 300)); // a day from the past
 
 app.post("/book", (req, res) => {
     let type = req.query.type, name = req.query.name
@@ -80,6 +86,14 @@ app.post("/book", (req, res) => {
         res.status(400).json({
             msg: "This class type does not exist"
         })
+        return;
+    }
+
+    if((new Date()) > classMap.get(type).startTime){
+        res.status(400).json({
+            msg: "Sorry the class has been already started"
+        })
+        return ;
     }
 
     let booking = classMap.get(type).bookUser(name);
@@ -95,17 +109,16 @@ app.post("/cancel", (req, res) => {
         res.status(400).json({
             msg: "This class type does not exist"
         })
+        return ;
     }
 
-    let currentTime = Date.now();
-    let classTime = classMap.get(type).startTime;
-    
-    let timeLeft = (parseInt(currentTime) - parseInt(classTime))/ 60000;
-
-    if(timeLeft < 30){
+    let timeAfter30 = new Date();
+    timeAfter30.setMinutes(timeAfter30.getMinutes() + 30);
+    if(timeAfter30 > classMap.get(type).startTime){
         res.status(400).json({
             msg: "Sorry you can only cancel a class upto 30 min before the class starts"
         })
+        return ;
     }
 
     let cancellation =  classMap.get(type).cancelUser(name);
