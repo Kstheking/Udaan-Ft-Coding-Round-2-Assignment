@@ -1,5 +1,7 @@
 # Udaan-Ft-Coding-Round2
 
+## [Problem Statement](https://github.com/Kstheking/Udaan-Ft-Coding-Round-2-Assignment/files/7655807/Fitness_Slot_Booking_System.1.4.1.1.pdf)
+
 ## Setup Instructions 
 
 - Download this folder somewhere in your system 
